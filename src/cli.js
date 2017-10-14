@@ -28,17 +28,27 @@ program
   .parse(process.argv)
 
 // Parse CLI parameters
-proxyUrl = program.url
-port = program.port
-useHeaders = program.useHeaders
-tokenName = program.tokenName
-token = program.token
-readOnly = program.readOnly
-
-if (!proxyUrl || !proxyUrl.length) {
+if (!program.url || !program.url.length) {
   console.log('No url was passed to proxy from')
   program.help()
   process.exit(1)
+} else {
+  proxyUrl = program.url  
+}
+if (program.port) {
+  port = program.port  
+}
+if (program.useHeaders) {
+  useHeaders = program.useHeaders  
+}
+if (program.tokenName) {
+  tokenName = program.tokenName  
+}
+if (program.token) {
+  token = program.token  
+}
+if (program.readOnly) {
+  readOnly = program.readOnly  
 }
 
 const server = http
