@@ -1,6 +1,6 @@
 {
   "name": "backend-proxy",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A command line utility that proxies a backend API",
   "main": "src/cli.js",
   "engines": {
@@ -20,7 +20,9 @@
     "url": "https://github.com/murcul/backend-proxy/issues"
   },
   "homepage": "https://github.com/murcul/backend-proxy#readme",
-  "dependencies": {},
+  "dependencies": {
+    "commander": "^2.11.0"
+  },
   "devDependencies": {
     "jest-cli": "^21.1.0",
     "jest": "^20.0.4",
