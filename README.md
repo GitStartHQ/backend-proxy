@@ -40,7 +40,11 @@ proxies to
 GET https://reqres.in/api/users/2
 ```
 
+## License
+
+Licensed under the [MIT License](https://github.com/murcul/backend-proxy/blob/master/LICENSE)
+
 [View this on npm](https://www.npmjs.com/package/backend-proxy)
 
-
 Made with ❤ by [Rikin Katyal](https://github.com/sirvar)
+
