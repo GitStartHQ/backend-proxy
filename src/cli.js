@@ -22,14 +22,14 @@ program
   .version('0.0.9')
   .option('-u, --url <s>', 'The URL to proxy to', string)
   .option('-r, --rewrite "<s> -> <s>"', 'Rewrite paths from source to destination', parseRewrite, [])
-  .option('-p, --port <n>', 'Port to serve the proxy requests on', parseInt, 3000)
-  .option('-h, --use-headers', 'Send token as a http header instead of url query (Default = false)', Boolean, false)
-  .option('-n, --token-name <s>', 'Name of the token query parameter / header name. (Default = token)', string, 'token')
+  .option('-p, --port <n>', 'Port to serve the proxy requests on', parseInt)
+  .option('-h, --use-headers', 'Send token as a http header instead of url query (Default = false)')
+  .option('-n, --token-name <s>', 'Name of the token query parameter / header name. (Default = token)', string)
   .option('-t, --token <s>', 'Token to use for all requests', string)
-  .option('-r, --read-only', 'Read only API calls. (Default = false)', Boolean, false)
+  .option('-r, --read-only', 'Read only API calls. (Default = false)')
   .parse(process.argv)
 
-const { port, useHeaders, tokenName, token, readOnly, rewrites, url: proxyUrl } = program;
+const { port = 3000, useHeaders, tokenName, token = 'token', readOnly, rewrites, url: proxyUrl } = program;
 
 // Parse CLI parameters
 if (!proxyUrl || !proxyUrl.length) {
