@@ -123,6 +123,34 @@ describe('Backend proxy lib', () => {
     })
   })
 
+  describe('when given path rewrites', () => {
+    let testServer, proxyServer
+    beforeAll(async () => {
+      testServer = await createTestServer(infoHandler)
+    })
+
+    afterAll(async () => {
+      await closeTestServer(testServer)
+    })
+
+    beforeEach(() => {
+      proxyServer = http.createServer(
+        createHandler({
+          proxyUrl: `http://localhost:${testServer.address().port}/api/1`,
+          rewrites: [{ source: '/old_path', destination: '/new_path' }],
+        })
+      )
+    })
+
+    it('rewrites the path properly', async () => {
+      expect((await request(proxyServer).get('/old_path?length=25')).body).toEqual(
+        expect.objectContaining({
+          url: '/api/1/new_path?length=25'
+        })
+      )
+    })
+  })
+
   describe('when given a specific token', () => {
     let testServer, proxyServer
     beforeAll(async () => {

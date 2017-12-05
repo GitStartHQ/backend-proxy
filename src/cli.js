@@ -6,54 +6,41 @@ var program = require('commander');
 
 const createHandler = require('./lib/index')
 
-var proxyUrl = ''
-var token = ''
-var tokenName = 'token'
-var readOnly = false
-var useHeaders = false
-var port = 3000
-
 function string(value) {
   return value.toString()
 }
 
+function parseRewrite(value, list) {
+  const paths = value.split('->').map(val => val.trim());
+  if (path.length !== 2) {
+    return list;
+  }
+  return [...list, { source: paths[0], destination: paths[1] }];
+}
+
 program
-  .version('0.1.0')
+  .version('0.0.9')
   .option('-u, --url <s>', 'The URL to proxy to', string)
-  .option('-p, --port <n>', 'Port to serve the proxy requests on', parseInt)
-  .option('-h, --use-headers', 'Send token as a http header instead of url query (Default = false)')
-  .option('-n, --token-name <s>', 'Name of the token query parameter / header name. (Default = token)', string)
+  .option('-r, --rewrite "<s> -> <s>"', 'Rewrite paths from source to destination', parseRewrite, [])
+  .option('-p, --port <n>', 'Port to serve the proxy requests on', parseInt, 3000)
+  .option('-h, --use-headers', 'Send token as a http header instead of url query (Default = false)', Boolean, false)
+  .option('-n, --token-name <s>', 'Name of the token query parameter / header name. (Default = token)', string, 'token')
   .option('-t, --token <s>', 'Token to use for all requests', string)
-  .option('-r, --read-only', 'Read only API calls. (Default = false)')
+  .option('-r, --read-only', 'Read only API calls. (Default = false)', Boolean, false)
   .parse(process.argv)
 
+const { port, useHeaders, tokenName, token, readOnly, rewrites, url: proxyUrl } = program;
+
 // Parse CLI parameters
-if (!program.url || !program.url.length) {
+if (!proxyUrl || !proxyUrl.length) {
   console.log('No url was passed to proxy from')
   program.help()
   process.exit(1)
-} else {
-  proxyUrl = program.url  
-}
-if (program.port) {
-  port = program.port  
-}
-if (program.useHeaders) {
-  useHeaders = program.useHeaders  
-}
-if (program.tokenName) {
-  tokenName = program.tokenName  
-}
-if (program.token) {
-  token = program.token  
-}
-if (program.readOnly) {
-  readOnly = program.readOnly  
 }
 
 const server = http
   .createServer(
-    createHandler({ proxyUrl, token, useHeaders, tokenName, readOnly })
+    createHandler({ proxyUrl, token, useHeaders, tokenName, readOnly, rewrites })
   )
   .listen(port)
 
