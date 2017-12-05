@@ -25,6 +25,7 @@ module.exports = function createHandler({
   readOnly,
   useHeaders,
   rewrites = [],
+  debug,
 }) {
   return (req, res) => {
     // filter out unwanted headers
@@ -55,6 +56,10 @@ module.exports = function createHandler({
       const url = useHeaders
         ? createUrl(proxyUrl, originPath)
         : createUrl(proxyUrl, originPath, token, tokenName)
+      
+      if (debug) {
+        console.log(`Proxifying ${originPath} => ${url}`);
+      }
 
       const proxyReq = request(
         url,
