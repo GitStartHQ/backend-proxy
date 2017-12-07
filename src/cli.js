@@ -17,7 +17,8 @@ function string(value) {
 
 function parseRewrite(value, list) {
   const paths = value.split('->').map(val => val.trim());
-  if (path.length !== 2) {
+  if (paths.length !== 2) {
+    console.log('Parse Error: can not parse the rewrite ', value);
     return list;
   }
   return [...list, { source: paths[0], destination: paths[1] }];
@@ -36,7 +37,17 @@ program
   .option('-r, --read-only', 'Read only API calls. (Default = false)')
   .parse(process.argv)
 
-const { port = 3000, useHeaders, tokenName, token = 'token', debug, readOnly, rewrites, url: proxyUrl } = program;
+const {
+  port = 3000,
+  useHeaders,
+  tokenName = 'token',
+  secure,
+  token,
+  debug,
+  readOnly,
+  rewrite: rewrites,
+  url: proxyUrl,
+} = program;
 
 // Parse CLI parameters
 if (!proxyUrl || !proxyUrl.length) {
@@ -53,6 +64,9 @@ const errorHandler = err => {
   }
 
   console.log(`Proxying requests from ${secure ? 'https': 'http'}://localhost:${port} => ${proxyUrl}`);
+  if (debug) {
+    rewrites.map(r => console.log(`Rewrite ${r.source} => ${r.destination}`));
+  }
 }
 
 if (!secure) {
