@@ -9,7 +9,7 @@ const request = function(url, options, cb) {
     port: parsedUrl.port,
     hostname: parsedUrl.hostname,
     path: parsedUrl.path
-  };
+  }
 
   if (parsedUrl.protocol === 'https:') {
     return https.request(opts, cb)
@@ -25,7 +25,7 @@ module.exports = function createHandler({
   readOnly,
   useHeaders,
   rewrites = [],
-  debug,
+  debug
 }) {
   return (req, res) => {
     // filter out unwanted headers
@@ -47,7 +47,7 @@ module.exports = function createHandler({
     const originPath = rewrites.reduce(
       (path, { source, destination }) => path.replace(source, destination),
       req.url
-    );
+    )
 
     if (
       !readOnly ||
@@ -56,9 +56,9 @@ module.exports = function createHandler({
       const url = useHeaders
         ? createUrl(proxyUrl, originPath)
         : createUrl(proxyUrl, originPath, token, tokenName)
-      
+
       if (debug) {
-        console.log(`Proxifying ${originPath} => ${url}`);
+        console.log(`Proxifying ${originPath} => ${url}`)
       }
 
       const proxyReq = request(
@@ -103,9 +103,13 @@ function createUrl(proxyUrl, originPath, token, tokenName) {
   if (!token) {
     return proxyUrl.replace(/\/$/, '') + originPath
   } else if (originPath.includes('?')) {
-    return proxyUrl.replace(/\/$/, '') + originPath + '&' + tokenName + '=' + token
+    return (
+      proxyUrl.replace(/\/$/, '') + originPath + '&' + tokenName + '=' + token
+    )
   } else {
-    return proxyUrl.replace(/\/$/, '') + originPath + '?' + tokenName + '=' + token
+    return (
+      proxyUrl.replace(/\/$/, '') + originPath + '?' + tokenName + '=' + token
+    )
   }
 }
 

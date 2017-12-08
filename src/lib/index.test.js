@@ -137,15 +137,26 @@ describe('Backend proxy lib', () => {
       proxyServer = http.createServer(
         createHandler({
           proxyUrl: `http://localhost:${testServer.address().port}/api/1`,
-          rewrites: [{ source: '/old_path', destination: '/new_path' }],
+          rewrites: [
+            { source: '/users', destination: '/customers' },
+            { source: '/clients', destination: '/customers' }
+          ]
         })
       )
     })
 
     it('rewrites the path properly', async () => {
-      expect((await request(proxyServer).get('/old_path?length=25')).body).toEqual(
+      expect((await request(proxyServer).get('/users?length=25')).body).toEqual(
         expect.objectContaining({
-          url: '/api/1/new_path?length=25'
+          url: '/api/1/customers?length=25'
+        })
+      )
+
+      expect(
+        (await request(proxyServer).get('/clients?length=25')).body
+      ).toEqual(
+        expect.objectContaining({
+          url: '/api/1/customers?length=25'
         })
       )
     })
