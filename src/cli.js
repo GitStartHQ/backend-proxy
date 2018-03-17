@@ -23,14 +23,37 @@ function parseRewrite(value, list) {
   return [...list, { source: paths[0], destination: paths[1] }]
 }
 
+function parseUrls(value, urls) {
+  return [...urls, value];
+}
+
+function parseMappings(value, mappings) {
+  const paths = value.split('->').map(val => val.trim())
+  if (paths.length !== 2) {
+    console.log('Parse Error: can not parse the mapping ', value)
+    return mappings
+  }
+  if (!Number.isInteger(+paths[1])) {
+    console.log('Error: can only map to a number which specifies the number for url ', paths[1])
+  }
+
+  return [...mappings, { source: paths[0], destination: +paths[1]}]
+}
+
 program
-  .version('0.0.11')
-  .option('-u, --url <s>', 'The URL to proxy to', string)
+  .version('0.0.12')
+  .option('-u, --url <s>', 'The URL to proxy to', parseUrls, [])
   .option('-d, --debug', 'Log info while proxifying requests (Default = false)')
   .option(
     '-r, --rewrite "<s> -> <d>"',
     'Rewrite paths from source to destination',
     parseRewrite,
+    []
+  )
+  .option(
+    '-m, --map "<s> -> <d>"',
+    'Maps paths to the url index',
+    parseMappings,
     []
   )
   .option('-p, --port <n>', 'Port to serve the proxy requests on', parseInt)
@@ -60,27 +83,29 @@ const {
   debug,
   readOnly,
   rewrite: rewrites,
-  url: proxyUrl
+  map: mappings,
+  url: proxyUrls
 } = program
 
 // Parse CLI parameters
-if (!proxyUrl || !proxyUrl.length) {
+if (!proxyUrls || !proxyUrls.length) {
   console.log('No url was passed to proxy from')
   program.help()
   process.exit(1)
 }
 
 const handler = createHandler({
-  proxyUrl,
+  proxyUrls,
   token,
   useHeaders,
   debug,
   tokenName,
   readOnly,
   rewrites,
+  mappings,
   secure
 })
-const errorHandler = err => {
+const onListen = err => {
   if (err) {
     console.log('got back error initiating the server: ', err)
     return
@@ -89,7 +114,7 @@ const errorHandler = err => {
   console.log(
     `Proxying requests from ${secure
       ? 'https'
-      : 'http'}://localhost:${port} => ${proxyUrl}`
+      : 'http'}://localhost:${port} => ${proxyUrls.map(url => (`\n\t ${url}`))}`
   )
   if (debug) {
     rewrites.map(r => console.log(`Rewrite ${r.source} => ${r.destination}`))
@@ -97,7 +122,7 @@ const errorHandler = err => {
 }
 
 if (!secure) {
-  http.createServer(handler).listen(port, errorHandler)
+  http.createServer(handler).listen(port, onListen)
 } else {
   https
     .createServer(

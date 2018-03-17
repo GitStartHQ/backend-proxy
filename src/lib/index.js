@@ -19,11 +19,12 @@ const request = function(url, options, cb) {
 }
 
 module.exports = function createHandler({
-  proxyUrl,
+  proxyUrls,
   token,
   tokenName,
   readOnly,
   useHeaders,
+  mappings = [],
   rewrites = [],
   debug
 }) {
@@ -48,6 +49,17 @@ module.exports = function createHandler({
       (path, { source, destination }) => path.replace(source, destination),
       req.url
     )
+
+    let proxyUrl = proxyUrls[0];
+
+    for (let i = 0; i < mappings.length; i++) {
+      const { source, destination } = mappings[i];
+      const url = proxyUrls[destination];
+      if (url && originPath.indexOf(source) !== -1) {
+        proxyUrl = url;
+        break;
+      }
+    }
 
     if (
       !readOnly ||

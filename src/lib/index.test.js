@@ -64,7 +64,7 @@ describe('Backend proxy lib', () => {
     beforeEach(() => {
       proxyServer = http.createServer(
         createHandler({
-          proxyUrl: `http://localhost:${testServer.address().port}`
+          proxyUrls: [`http://localhost:${testServer.address().port}`]
         })
       )
     })
@@ -98,7 +98,7 @@ describe('Backend proxy lib', () => {
       const testServer = await createTestServer(jsonHandler)
       const proxyServer = http.createServer(
         createHandler({
-          proxyUrl: `http://localhost:${testServer.address().port}`,
+          proxyUrls: [`http://localhost:${testServer.address().port}`],
           readOnly: true
         })
       )
@@ -114,7 +114,7 @@ describe('Backend proxy lib', () => {
       // Note: we use a dummy proxy url that fails to make sure proxy does not
       // make a request to that url when blocking readonly requests
       const proxyServer = http.createServer(
-        createHandler({ proxyUrl: `http://random_url.co/api`, readOnly: true })
+        createHandler({ proxyUrls: [`http://random_url.co/api`], readOnly: true })
       )
 
       expect((await request(proxyServer).post('/users')).status).toBe(500)
@@ -122,6 +122,39 @@ describe('Backend proxy lib', () => {
       expect((await request(proxyServer).delete('/users')).status).toBe(500)
     })
   })
+
+  it('when given multiple urls', async () => {
+    const testJsonServer = await createTestServer(jsonHandler)
+    const testInfoServer = await createTestServer(infoHandler)
+    const proxyServer = http.createServer(
+      createHandler({
+        proxyUrls: [
+          `http://localhost:${testJsonServer.address().port}`,
+          `http://localhost:${testInfoServer.address().port}`,
+        ],
+        mappings: [
+          { source: '/info', destination: 1 },
+        ],
+        readOnly: true
+      })
+    )
+
+    // chooses the first one
+    expect((await request(proxyServer).get('/users')).body).toEqual({
+      data: { name: 'John', age: 23 }
+    })
+
+    // chooses the info
+    expect((await request(proxyServer).get('/info/xyz')).body).toEqual(
+      expect.objectContaining({
+        url: '/info/xyz'
+      })
+    )
+    await Promise.all([
+      closeTestServer(testJsonServer),
+      closeTestServer(testInfoServer),
+    ]);
+  });
 
   describe('when given path rewrites', () => {
     let testServer, proxyServer
@@ -136,7 +169,7 @@ describe('Backend proxy lib', () => {
     beforeEach(() => {
       proxyServer = http.createServer(
         createHandler({
-          proxyUrl: `http://localhost:${testServer.address().port}/api/1`,
+          proxyUrls: [`http://localhost:${testServer.address().port}/api/1`],
           rewrites: [
             { source: '/users', destination: '/customers' },
             { source: '/clients', destination: '/customers' }
@@ -175,7 +208,7 @@ describe('Backend proxy lib', () => {
     beforeEach(() => {
       proxyServer = http.createServer(
         createHandler({
-          proxyUrl: `http://localhost:${testServer.address().port}/api/1`,
+          proxyUrls: [`http://localhost:${testServer.address().port}/api/1`],
           tokenName: 'testToken',
           token: '123'
         })
@@ -193,7 +226,7 @@ describe('Backend proxy lib', () => {
     it('suppors http header tokens', async () => {
       const anotherProxyServer = http.createServer(
         createHandler({
-          proxyUrl: `http://localhost:${testServer.address().port}/api/1`,
+          proxyUrls: [`http://localhost:${testServer.address().port}/api/1`],
           tokenName: 'test-token',
           token: '123',
           useHeaders: true
@@ -219,7 +252,7 @@ describe('Backend proxy lib', () => {
     beforeEach(() => {
       proxyServer = http.createServer(
         createHandler({
-          proxyUrl: `http://localhost:${testServer.address().port}/api/1`
+          proxyUrls: [`http://localhost:${testServer.address().port}/api/1`]
         })
       )
     })
@@ -239,7 +272,7 @@ describe('Backend proxy lib', () => {
     let server
     beforeEach(() => {
       server = http.createServer(
-        createHandler({ proxyUrl: 'https://reqres.in/api' })
+        createHandler({ proxyUrls: ['https://reqres.in/api'] })
       )
     })
     it('Proxy JSON properly', async () => {
@@ -256,7 +289,7 @@ describe('Backend proxy lib', () => {
     let server
     beforeEach(() => {
       server = http.createServer(
-        createHandler({ proxyUrl: 'https://reqres.in/api', readOnly: true })
+        createHandler({ proxyUrls: ['https://reqres.in/api'], readOnly: true })
       )
     })
     it('Test read only', async () => {
