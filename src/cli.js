@@ -4,7 +4,6 @@ const https = require('https')
 const fs = require('fs')
 const path = require('path')
 const url = require('url')
-const request = require('request')
 var program = require('commander')
 
 const pkey = fs.readFileSync(path.join(__dirname, 'certs/server.key'))
