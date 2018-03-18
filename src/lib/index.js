@@ -85,10 +85,17 @@ module.exports = function createHandler({
           // enable CORS
           const origin = req.headers['origin'],
             requestedMethods = req.headers['access-control-request-method'],
-            requestHeaders = req.headers['access-control-request-headers']
+            requestHeaders = req.headers['access-control-request-headers'];
           responseHeaders['Access-Control-Allow-Credentials'] = 'true'
           if (origin) {
             responseHeaders['Access-Control-Allow-Origin'] = origin
+          }
+          if (responseHeaders['set-cookie']) {
+            let cookies = responseHeaders['set-cookie'];
+            if (typeof cookies === 'string') {
+              cookies = [ cookies ]
+            }
+            responseHeaders['set-cookie'] = cookies.map(cookie => cookie.replace(/[dD]omain=[^\\\s]*;/g, ''))
           }
           if (requestedMethods) {
             responseHeaders['Access-Control-Allow-Methods'] = requestedMethods

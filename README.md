@@ -30,6 +30,12 @@ $ backend-proxy --url PROXY_URL --token-name --token TOKEN --use-headers --port 
 | --debug | Print extra information for debugging | false |  |
 | --secure | Print extra information for debugging | false |  |
 
+## Usecases
+- Proxies cookies properly by removing the scoped domain
+- Adds proper CORs headers allowing full access from the browser
+- Supports POST requests and proxies them transparently
+- Read Only mode allows easy testing for backend APIs where accidental changes are prevented
+
 
 ## Example
 
