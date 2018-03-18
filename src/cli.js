@@ -41,7 +41,7 @@ function parseMappings(value, mappings) {
 }
 
 program
-  .version('0.0.12')
+  .version('0.0.13')
   .option('-u, --url <s>', 'The URL to proxy to', parseUrls, [])
   .option('-d, --debug', 'Log info while proxifying requests (Default = false)')
   .option(
